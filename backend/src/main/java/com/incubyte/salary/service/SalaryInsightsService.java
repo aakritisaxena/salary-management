@@ -2,6 +2,7 @@ package com.incubyte.salary.service;
 
 import com.incubyte.salary.dto.DepartmentInsight;
 import com.incubyte.salary.dto.InsightsResponse;
+import com.incubyte.salary.dto.JobTitleInsight;
 import com.incubyte.salary.repository.EmployeeRepository;
 import org.springframework.stereotype.Service;
 
@@ -37,5 +38,9 @@ public class SalaryInsightsService {
                 .orElse(BigDecimal.ZERO);
 
         return new InsightsResponse(total, total == 0 ? 0.0 : averageSalary, minSalary, maxSalary, byDepartment, byCountry);
+    }
+
+    public List<JobTitleInsight> getJobTitleInsights(String country) {
+        return employeeRepository.findSalaryStatsByJobTitle(country);
     }
 }

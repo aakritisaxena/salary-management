@@ -3,6 +3,7 @@ package com.incubyte.salary.service;
 import com.incubyte.salary.dto.CountryInsight;
 import com.incubyte.salary.dto.DepartmentInsight;
 import com.incubyte.salary.dto.InsightsResponse;
+import com.incubyte.salary.dto.JobTitleInsight;
 import com.incubyte.salary.repository.EmployeeRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,6 +16,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class SalaryInsightsServiceTest {
@@ -72,5 +74,33 @@ class SalaryInsightsServiceTest {
         assertThat(response.totalEmployees()).isZero();
         assertThat(response.byDepartment()).isEmpty();
         assertThat(response.byCountry()).isEmpty();
+    }
+
+    @Test
+    void getJobTitleInsights_withCountry_delegatesToRepository() {
+        List<JobTitleInsight> expected = List.of(
+                new JobTitleInsight("Engineer", 10, 80000.0, new BigDecimal("50000"), new BigDecimal("120000"))
+        );
+        when(employeeRepository.findSalaryStatsByJobTitle("IN")).thenReturn(expected);
+
+        List<JobTitleInsight> result = salaryInsightsService.getJobTitleInsights("IN");
+
+        assertThat(result).isEqualTo(expected);
+        verify(employeeRepository).findSalaryStatsByJobTitle("IN");
+    }
+
+    @Test
+    void getJobTitleInsights_withoutCountry_passesNullToRepository() {
+        List<JobTitleInsight> expected = List.of(
+                new JobTitleInsight("Engineer", 5, 75000.0, new BigDecimal("50000"), new BigDecimal("100000")),
+                new JobTitleInsight("Analyst",  3, 60000.0, new BigDecimal("45000"), new BigDecimal("75000"))
+        );
+        when(employeeRepository.findSalaryStatsByJobTitle(null)).thenReturn(expected);
+
+        List<JobTitleInsight> result = salaryInsightsService.getJobTitleInsights(null);
+
+        assertThat(result).hasSize(2);
+        assertThat(result.get(0).jobTitle()).isEqualTo("Engineer");
+        verify(employeeRepository).findSalaryStatsByJobTitle(null);
     }
 }

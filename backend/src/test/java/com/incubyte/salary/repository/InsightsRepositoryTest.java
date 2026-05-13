@@ -2,6 +2,7 @@ package com.incubyte.salary.repository;
 
 import com.incubyte.salary.dto.CountryInsight;
 import com.incubyte.salary.dto.DepartmentInsight;
+import com.incubyte.salary.dto.JobTitleInsight;
 import com.incubyte.salary.model.Employee;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -73,6 +74,73 @@ class InsightsRepositoryTest {
         List<CountryInsight> stats = employeeRepository.findSalaryStatsByCountry();
         List<String> names = stats.stream().map(CountryInsight::country).toList();
         assertThat(names).isSorted();
+    }
+
+    @Test
+    void findSalaryStatsByJobTitle_withoutFilter_returnsAllJobTitles() {
+        employeeRepository.deleteAll();
+        employeeRepository.save(employeeWithTitle("t1@x.com", "Manager", "IN", new BigDecimal("100000")));
+        employeeRepository.save(employeeWithTitle("t2@x.com", "Manager", "US", new BigDecimal("120000")));
+        employeeRepository.save(employeeWithTitle("t3@x.com", "Analyst", "IN", new BigDecimal("60000")));
+
+        List<JobTitleInsight> stats = employeeRepository.findSalaryStatsByJobTitle(null);
+
+        assertThat(stats).hasSize(2);
+
+        JobTitleInsight manager = stats.stream()
+                .filter(s -> s.jobTitle().equals("Manager")).findFirst().orElseThrow();
+        assertThat(manager.headcount()).isEqualTo(2);
+        assertThat(manager.averageSalary()).isCloseTo(110000.0, offset(0.01));
+        assertThat(manager.minSalary()).isEqualByComparingTo("100000");
+        assertThat(manager.maxSalary()).isEqualByComparingTo("120000");
+    }
+
+    @Test
+    void findSalaryStatsByJobTitle_withCountryFilter_returnsOnlyMatchingCountry() {
+        employeeRepository.deleteAll();
+        employeeRepository.save(employeeWithTitle("t4@x.com", "Manager", "IN", new BigDecimal("100000")));
+        employeeRepository.save(employeeWithTitle("t5@x.com", "Manager", "US", new BigDecimal("120000")));
+        employeeRepository.save(employeeWithTitle("t6@x.com", "Analyst", "IN", new BigDecimal("60000")));
+
+        List<JobTitleInsight> stats = employeeRepository.findSalaryStatsByJobTitle("IN");
+
+        assertThat(stats).hasSize(2);
+
+        JobTitleInsight manager = stats.stream()
+                .filter(s -> s.jobTitle().equals("Manager")).findFirst().orElseThrow();
+        assertThat(manager.headcount()).isEqualTo(1);
+        assertThat(manager.averageSalary()).isCloseTo(100000.0, offset(0.01));
+
+        JobTitleInsight analyst = stats.stream()
+                .filter(s -> s.jobTitle().equals("Analyst")).findFirst().orElseThrow();
+        assertThat(analyst.headcount()).isEqualTo(1);
+    }
+
+    @Test
+    void findSalaryStatsByJobTitle_orderedByAverageSalaryDescending() {
+        employeeRepository.deleteAll();
+        employeeRepository.save(employeeWithTitle("t7@x.com", "Junior",  "IN", new BigDecimal("40000")));
+        employeeRepository.save(employeeWithTitle("t8@x.com", "Senior",  "IN", new BigDecimal("90000")));
+        employeeRepository.save(employeeWithTitle("t9@x.com", "Manager", "IN", new BigDecimal("120000")));
+
+        List<JobTitleInsight> stats = employeeRepository.findSalaryStatsByJobTitle(null);
+
+        assertThat(stats).extracting(JobTitleInsight::jobTitle)
+                .containsExactly("Manager", "Senior", "Junior");
+    }
+
+    private Employee employeeWithTitle(String email, String jobTitle, String country, BigDecimal salary) {
+        Employee e = new Employee();
+        e.setId(UUID.randomUUID());
+        e.setFullName("Test Employee");
+        e.setJobTitle(jobTitle);
+        e.setCountry(country);
+        e.setSalary(salary);
+        e.setCurrency("USD");
+        e.setEmail(email);
+        e.setDepartment("Engineering");
+        e.setHireDate(LocalDate.now().minusDays(1));
+        return e;
     }
 
     private Employee employee(String email, String department, String country, BigDecimal salary) {

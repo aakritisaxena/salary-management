@@ -3,6 +3,7 @@ package com.incubyte.salary.controller;
 import com.incubyte.salary.dto.CountryInsight;
 import com.incubyte.salary.dto.DepartmentInsight;
 import com.incubyte.salary.dto.InsightsResponse;
+import com.incubyte.salary.dto.JobTitleInsight;
 import com.incubyte.salary.service.SalaryInsightsService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,5 +56,46 @@ class InsightsControllerTest {
                 .andExpect(jsonPath("$.totalEmployees").value(0))
                 .andExpect(jsonPath("$.byDepartment").isEmpty())
                 .andExpect(jsonPath("$.byCountry").isEmpty());
+    }
+
+    @Test
+    void getJobTitleInsights_withCountryParam_returns200WithFilteredData() throws Exception {
+        when(salaryInsightsService.getJobTitleInsights("IN")).thenReturn(List.of(
+                new JobTitleInsight("Engineer", 5, 80000.0, new BigDecimal("50000"), new BigDecimal("120000")),
+                new JobTitleInsight("Analyst",  2, 60000.0, new BigDecimal("45000"), new BigDecimal("75000"))
+        ));
+
+        mockMvc.perform(get("/api/insights/job-titles").param("country", "IN"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$[0].jobTitle").value("Engineer"))
+                .andExpect(jsonPath("$[0].headcount").value(5))
+                .andExpect(jsonPath("$[0].averageSalary").value(80000.0))
+                .andExpect(jsonPath("$[0].minSalary").value(50000))
+                .andExpect(jsonPath("$[0].maxSalary").value(120000))
+                .andExpect(jsonPath("$[1].jobTitle").value("Analyst"));
+    }
+
+    @Test
+    void getJobTitleInsights_withoutCountryParam_returns200WithAllData() throws Exception {
+        when(salaryInsightsService.getJobTitleInsights(null)).thenReturn(List.of(
+                new JobTitleInsight("Manager", 3, 110000.0, new BigDecimal("90000"), new BigDecimal("130000"))
+        ));
+
+        mockMvc.perform(get("/api/insights/job-titles"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$[0].jobTitle").value("Manager"))
+                .andExpect(jsonPath("$[0].headcount").value(3));
+    }
+
+    @Test
+    void getJobTitleInsights_returnsEmptyArrayWhenNoData() throws Exception {
+        when(salaryInsightsService.getJobTitleInsights(null)).thenReturn(List.of());
+
+        mockMvc.perform(get("/api/insights/job-titles"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$").isEmpty());
     }
 }
