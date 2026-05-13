@@ -88,9 +88,9 @@ class EmployeeServiceTest {
     void findAll_returnsPaginatedResults() {
         PageRequest pageable = PageRequest.of(0, 10);
         Page<Employee> page = new PageImpl<>(List.of(employee));
-        when(employeeRepository.findByFilters(null, null, pageable)).thenReturn(page);
+        when(employeeRepository.findByFilters(null, null, null, pageable)).thenReturn(page);
 
-        Page<Employee> result = employeeService.findAll(null, null, pageable);
+        Page<Employee> result = employeeService.findAll(null, null, null, pageable);
 
         assertThat(result.getContent()).containsExactly(employee);
     }
@@ -99,12 +99,24 @@ class EmployeeServiceTest {
     void findAll_passesFiltersToRepository() {
         PageRequest pageable = PageRequest.of(0, 10);
         Page<Employee> page = new PageImpl<>(List.of(employee));
-        when(employeeRepository.findByFilters("IN", "Engineering", pageable)).thenReturn(page);
+        when(employeeRepository.findByFilters("IN", "Engineering", null, pageable)).thenReturn(page);
 
-        Page<Employee> result = employeeService.findAll("IN", "Engineering", pageable);
+        Page<Employee> result = employeeService.findAll("IN", "Engineering", null, pageable);
 
         assertThat(result.getContent()).containsExactly(employee);
-        verify(employeeRepository).findByFilters("IN", "Engineering", pageable);
+        verify(employeeRepository).findByFilters("IN", "Engineering", null, pageable);
+    }
+
+    @Test
+    void findAll_passesNameFilterToRepository() {
+        PageRequest pageable = PageRequest.of(0, 10);
+        Page<Employee> page = new PageImpl<>(List.of(employee));
+        when(employeeRepository.findByFilters(null, null, "Jane", pageable)).thenReturn(page);
+
+        Page<Employee> result = employeeService.findAll(null, null, "Jane", pageable);
+
+        assertThat(result.getContent()).containsExactly(employee);
+        verify(employeeRepository).findByFilters(null, null, "Jane", pageable);
     }
 
     @Test

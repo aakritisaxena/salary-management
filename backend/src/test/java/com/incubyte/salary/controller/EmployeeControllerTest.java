@@ -65,7 +65,7 @@ class EmployeeControllerTest {
 
     @Test
     void getEmployees_returns200WithPagedContent() throws Exception {
-        when(employeeService.findAll(any(), any(), any()))
+        when(employeeService.findAll(any(), any(), any(), any()))
                 .thenReturn(new PageImpl<>(List.of(employee), PageRequest.of(0, 50), 1));
 
         mockMvc.perform(get("/api/employees"))
@@ -76,13 +76,24 @@ class EmployeeControllerTest {
 
     @Test
     void getEmployees_passesCountryFilterToService() throws Exception {
-        when(employeeService.findAll(eq("IN"), any(), any()))
+        when(employeeService.findAll(eq("IN"), any(), any(), any()))
                 .thenReturn(new PageImpl<>(List.of(employee)));
 
         mockMvc.perform(get("/api/employees").param("country", "IN"))
                 .andExpect(status().isOk());
 
-        verify(employeeService).findAll(eq("IN"), any(), any());
+        verify(employeeService).findAll(eq("IN"), any(), any(), any());
+    }
+
+    @Test
+    void getEmployees_passesNameFilterToService() throws Exception {
+        when(employeeService.findAll(any(), any(), eq("Jane"), any()))
+                .thenReturn(new PageImpl<>(List.of(employee)));
+
+        mockMvc.perform(get("/api/employees").param("name", "Jane"))
+                .andExpect(status().isOk());
+
+        verify(employeeService).findAll(any(), any(), eq("Jane"), any());
     }
 
     @Test

@@ -15,9 +15,10 @@ import java.util.UUID;
 
 public interface EmployeeRepository extends JpaRepository<Employee, UUID> {
 
-    @Query("SELECT e FROM Employee e WHERE (:country IS NULL OR e.country = :country) AND (:department IS NULL OR e.department = :department)")
+    @Query("SELECT e FROM Employee e WHERE (:country IS NULL OR e.country = :country) AND (:department IS NULL OR e.department = :department) AND (:name IS NULL OR LOWER(e.fullName) LIKE LOWER(CONCAT('%', :name, '%')))")
     Page<Employee> findByFilters(@Param("country") String country,
                                  @Param("department") String department,
+                                 @Param("name") String name,
                                  Pageable pageable);
 
     @Query("SELECT new com.incubyte.salary.dto.DepartmentInsight(e.department, COUNT(e), AVG(e.salary), MIN(e.salary), MAX(e.salary)) " +

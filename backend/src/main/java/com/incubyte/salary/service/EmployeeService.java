@@ -34,8 +34,8 @@ public class EmployeeService {
                 .orElseThrow(() -> new EmployeeNotFoundException(id));
     }
 
-    public Page<Employee> findAll(String country, String department, Pageable pageable) {
-        return employeeRepository.findByFilters(country, department, pageable);
+    public Page<Employee> findAll(String country, String department, String name, Pageable pageable) {
+        return employeeRepository.findByFilters(country, department, name, pageable);
     }
 
     public Employee update(UUID id, Employee updates) {

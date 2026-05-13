@@ -55,7 +55,7 @@ class EmployeeRepositoryTest {
         employeeRepository.save(buildEmployee("Alice", "alice@example.com", "IN", "Engineering"));
         employeeRepository.save(buildEmployee("Bob", "bob@example.com", "US", "Sales"));
 
-        Page<Employee> result = employeeRepository.findByFilters(null, null, PageRequest.of(0, 10));
+        Page<Employee> result = employeeRepository.findByFilters(null, null, null, PageRequest.of(0, 10));
 
         assertThat(result.getTotalElements()).isEqualTo(2);
     }
@@ -65,7 +65,7 @@ class EmployeeRepositoryTest {
         employeeRepository.save(buildEmployee("Alice", "alice@example.com", "IN", "Engineering"));
         employeeRepository.save(buildEmployee("Bob", "bob@example.com", "US", "Engineering"));
 
-        Page<Employee> result = employeeRepository.findByFilters("IN", null, PageRequest.of(0, 10));
+        Page<Employee> result = employeeRepository.findByFilters("IN", null, null, PageRequest.of(0, 10));
 
         assertThat(result.getTotalElements()).isEqualTo(1);
         assertThat(result.getContent().get(0).getFullName()).isEqualTo("Alice");
@@ -76,7 +76,7 @@ class EmployeeRepositoryTest {
         employeeRepository.save(buildEmployee("Alice", "alice@example.com", "IN", "Engineering"));
         employeeRepository.save(buildEmployee("Bob", "bob@example.com", "IN", "Sales"));
 
-        Page<Employee> result = employeeRepository.findByFilters(null, "Sales", PageRequest.of(0, 10));
+        Page<Employee> result = employeeRepository.findByFilters(null, "Sales", null, PageRequest.of(0, 10));
 
         assertThat(result.getTotalElements()).isEqualTo(1);
         assertThat(result.getContent().get(0).getFullName()).isEqualTo("Bob");
@@ -88,10 +88,32 @@ class EmployeeRepositoryTest {
         employeeRepository.save(buildEmployee("Bob", "bob@example.com", "IN", "Sales"));
         employeeRepository.save(buildEmployee("Charlie", "charlie@example.com", "US", "Engineering"));
 
-        Page<Employee> result = employeeRepository.findByFilters("IN", "Engineering", PageRequest.of(0, 10));
+        Page<Employee> result = employeeRepository.findByFilters("IN", "Engineering", null, PageRequest.of(0, 10));
 
         assertThat(result.getTotalElements()).isEqualTo(1);
         assertThat(result.getContent().get(0).getFullName()).isEqualTo("Alice");
+    }
+
+    @Test
+    void findByFilters_withName_returnsPartialCaseInsensitiveMatch() {
+        employeeRepository.save(buildEmployee("Alice Smith", "alice@example.com", "IN", "Engineering"));
+        employeeRepository.save(buildEmployee("Bob Johnson", "bob@example.com", "US", "Sales"));
+
+        Page<Employee> result = employeeRepository.findByFilters(null, null, "alice", PageRequest.of(0, 10));
+
+        assertThat(result.getTotalElements()).isEqualTo(1);
+        assertThat(result.getContent().get(0).getFullName()).isEqualTo("Alice Smith");
+    }
+
+    @Test
+    void findByFilters_withName_matchesPartialName() {
+        employeeRepository.save(buildEmployee("Alice Smith", "alice@example.com", "IN", "Engineering"));
+        employeeRepository.save(buildEmployee("Alice Brown", "abrown@example.com", "US", "Sales"));
+        employeeRepository.save(buildEmployee("Bob Johnson", "bob@example.com", "US", "Sales"));
+
+        Page<Employee> result = employeeRepository.findByFilters(null, null, "alice", PageRequest.of(0, 10));
+
+        assertThat(result.getTotalElements()).isEqualTo(2);
     }
 
     @Test
@@ -100,7 +122,7 @@ class EmployeeRepositoryTest {
             employeeRepository.save(buildEmployee("Employee " + i, "emp" + i + "@example.com", "IN", "Engineering"));
         }
 
-        Page<Employee> result = employeeRepository.findByFilters(null, null, PageRequest.of(0, 2));
+        Page<Employee> result = employeeRepository.findByFilters(null, null, null, PageRequest.of(0, 2));
 
         assertThat(result.getContent()).hasSize(2);
         assertThat(result.getTotalElements()).isEqualTo(5);

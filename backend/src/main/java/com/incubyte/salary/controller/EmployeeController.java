@@ -29,8 +29,9 @@ public class EmployeeController {
     public Page<EmployeeResponse> list(
             @RequestParam(required = false) String country,
             @RequestParam(required = false) String department,
+            @RequestParam(required = false) String name,
             @PageableDefault(size = 50) Pageable pageable) {
-        return employeeService.findAll(country, department, pageable)
+        return employeeService.findAll(country, department, name, pageable)
                 .map(EmployeeResponse::from);
     }
 
