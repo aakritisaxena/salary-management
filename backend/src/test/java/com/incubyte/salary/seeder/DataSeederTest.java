@@ -5,8 +5,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
 @TestPropertySource(properties = "app.seed.enabled=true")
@@ -43,5 +45,12 @@ class DataSeederTest {
             assertThat(employee.getCountry()).isNotBlank();
             assertThat(employee.getDepartment()).isNotBlank();
         });
+    }
+
+    @Test
+    void loadLines_throwsIllegalStateExceptionWhenResourceNotFound() {
+        assertThatThrownBy(() -> ReflectionTestUtils.invokeMethod(dataSeeder, "loadLines", "data/nonexistent.txt"))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("Failed to load resource: data/nonexistent.txt");
     }
 }

@@ -59,6 +59,9 @@ public class DataSeeder {
         if (existing != null && existing >= SEED_COUNT) {
             return;
         }
+        if (existing != null && existing > 0) {
+            jdbcTemplate.execute("DELETE FROM employees");
+        }
 
         List<String> firstNames = loadLines("data/first_names.txt");
         List<String> lastNames = loadLines("data/last_names.txt");

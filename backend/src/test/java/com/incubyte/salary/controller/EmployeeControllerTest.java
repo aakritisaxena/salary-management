@@ -20,6 +20,8 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.dao.DataIntegrityViolationException;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -148,6 +150,18 @@ class EmployeeControllerTest {
                 .andExpect(jsonPath("$.message").value("Employee deleted successfully"));
 
         verify(employeeService).delete(employee.getId());
+    }
+
+    @Test
+    void createEmployee_returns409OnDuplicateEmail() throws Exception {
+        when(employeeService.create(any(Employee.class)))
+                .thenThrow(new DataIntegrityViolationException("duplicate"));
+
+        mockMvc.perform(post("/api/employees")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(validRequest)))
+                .andExpect(status().isConflict())
+                .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON));
     }
 
     @Test
