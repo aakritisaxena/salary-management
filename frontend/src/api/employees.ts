@@ -6,6 +6,7 @@ interface ListParams {
   size?: number
   country?: string
   department?: string
+  name?: string
 }
 
 export const employeeApi = {
