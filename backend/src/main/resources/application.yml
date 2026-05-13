@@ -1,12 +1,17 @@
 spring:
   datasource:
-    url: jdbc:sqlite:salary.db
-    driver-class-name: org.sqlite.JDBC
+    url: jdbc:h2:file:./salary
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ''
   jpa:
-    database-platform: org.hibernate.community.dialect.SQLiteDialect
+    database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
       ddl-auto: update
     show-sql: false
+  h2:
+    console:
+      enabled: true
   sql:
     init:
       mode: never

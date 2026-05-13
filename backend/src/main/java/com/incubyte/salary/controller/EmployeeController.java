@@ -11,6 +11,8 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 import java.util.UUID;
 
 @RestController
@@ -50,9 +52,9 @@ public class EmployeeController {
     }
 
     @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable UUID id) {
+    public Map<String, String> delete(@PathVariable UUID id) {
         employeeService.delete(id);
+        return Map.of("message", "Employee deleted successfully");
     }
 
     private Employee toEntity(EmployeeRequest r) {

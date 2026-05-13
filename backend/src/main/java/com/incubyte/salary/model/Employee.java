@@ -13,7 +13,6 @@ import java.util.UUID;
 public class Employee {
 
     @Id
-    @Column(columnDefinition = "TEXT")
     private UUID id;
 
     @NotBlank
@@ -64,6 +63,7 @@ public class Employee {
 
     @PrePersist
     void onCreate() {
+        if (id == null) id = UUID.randomUUID();
         createdAt = Instant.now();
         updatedAt = Instant.now();
     }

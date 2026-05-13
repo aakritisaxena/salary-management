@@ -64,7 +64,7 @@ public class DataSeeder {
         List<String> lastNames = loadLines("data/last_names.txt");
 
         Random random = new Random(42);
-        long nowMillis = Instant.now().toEpochMilli();
+        Timestamp now = Timestamp.from(Instant.now());
 
         String sql = "INSERT INTO employees (id, full_name, job_title, country, salary, currency, email, department, hire_date, created_at, updated_at) " +
                      "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
@@ -90,8 +90,8 @@ public class DataSeeder {
                         ps.setString(7, firstName.toLowerCase() + "." + lastName.toLowerCase() + (from + i) + "@example.com");
                         ps.setString(8, DEPARTMENTS[random.nextInt(DEPARTMENTS.length)]);
                         ps.setTimestamp(9, Timestamp.valueOf(hireDate.atStartOfDay()));
-                        ps.setLong(10, nowMillis);
-                        ps.setLong(11, nowMillis);
+                        ps.setTimestamp(10, now);
+                        ps.setTimestamp(11, now);
                     }
 
                     @Override

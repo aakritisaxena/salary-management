@@ -140,11 +140,12 @@ class EmployeeControllerTest {
     }
 
     @Test
-    void deleteEmployee_returns204() throws Exception {
+    void deleteEmployee_returns200WithMessage() throws Exception {
         doNothing().when(employeeService).delete(employee.getId());
 
         mockMvc.perform(delete("/api/employees/{id}", employee.getId()))
-                .andExpect(status().isNoContent());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("Employee deleted successfully"));
 
         verify(employeeService).delete(employee.getId());
     }

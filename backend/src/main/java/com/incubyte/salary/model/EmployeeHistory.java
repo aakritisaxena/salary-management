@@ -13,11 +13,10 @@ import java.util.UUID;
 public class EmployeeHistory {
 
     @Id
-    @Column(columnDefinition = "TEXT")
     private UUID id;
 
     @NotNull
-    @Column(nullable = false, columnDefinition = "TEXT")
+    @Column(nullable = false)
     private UUID employeeId;
 
     @NotBlank
