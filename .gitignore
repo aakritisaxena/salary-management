@@ -31,6 +31,5 @@ Thumbs.db
 
 # Logs
 *.log
-/docs/
 .claude/
 backend/src/test/resources/mockito-extensions/org.mockito.plugins.MockMaker
