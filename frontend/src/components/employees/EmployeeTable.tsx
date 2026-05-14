@@ -30,22 +30,10 @@ const DEPARTMENTS = [
   'Sales', 'Finance', 'HR', 'Operations',
 ]
 
-function formatCurrency(salary: number, currency: string) {
-  try {
-    return new Intl.NumberFormat('en', {
-      style: 'currency',
-      currency,
-      maximumFractionDigits: 0,
-    }).format(salary)
-  } catch {
-    return `${currency} ${salary.toLocaleString()}`
-  }
-}
-
 function SkeletonRow() {
   return (
     <TableRow>
-      {Array.from({ length: 7 }).map((_, i) => (
+      {Array.from({ length: 6 }).map((_, i) => (
         <TableCell key={i}>
           <div className="h-4 bg-muted rounded animate-pulse" />
         </TableCell>
@@ -58,9 +46,10 @@ interface Props {
   onAdd: () => void
   onEdit: (employee: Employee) => void
   onDelete: (employee: Employee) => void
+  onView: (employee: Employee) => void
 }
 
-export default function EmployeeTable({ onAdd, onEdit, onDelete }: Props) {
+export default function EmployeeTable({ onAdd, onEdit, onDelete, onView }: Props) {
   const [page, setPage] = useState(0)
   const [country, setCountry] = useState<string>('')
   const [department, setDepartment] = useState<string>('')
@@ -111,7 +100,7 @@ export default function EmployeeTable({ onAdd, onEdit, onDelete }: Props) {
         <div>
           <h1 className="text-2xl font-semibold">Employees</h1>
           <p className="text-sm text-muted-foreground mt-0.5">
-            {data?.totalElements.toLocaleString() ?? '—'} total
+            {data?.totalElements.toLocaleString() ?? '—'} total · click a name to view details
           </p>
         </div>
         <Button onClick={onAdd}>
@@ -171,7 +160,6 @@ export default function EmployeeTable({ onAdd, onEdit, onDelete }: Props) {
               <TableHead>Job Title</TableHead>
               <TableHead>Department</TableHead>
               <TableHead>Country</TableHead>
-              <TableHead>Salary</TableHead>
               <TableHead>Hire Date</TableHead>
               <TableHead className="w-16" />
             </TableRow>
@@ -181,28 +169,26 @@ export default function EmployeeTable({ onAdd, onEdit, onDelete }: Props) {
               Array.from({ length: 8 }).map((_, i) => <SkeletonRow key={i} />)
             ) : employees.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-16 text-muted-foreground">
+                <TableCell colSpan={6} className="text-center py-16 text-muted-foreground">
                   No employees found
                 </TableCell>
               </TableRow>
             ) : (
               employees.map(emp => (
-                <TableRow key={emp.id}>
+                <TableRow key={emp.id} className="cursor-pointer" onClick={() => onView(emp)}>
                   <TableCell>
-                    <div className="font-medium">{emp.fullName}</div>
-                    <div className="text-xs text-muted-foreground">{emp.email}</div>
+                    <span className="font-medium hover:underline underline-offset-2">
+                      {emp.fullName}
+                    </span>
                   </TableCell>
                   <TableCell>{emp.jobTitle}</TableCell>
                   <TableCell>
                     <Badge variant="secondary">{emp.department}</Badge>
                   </TableCell>
                   <TableCell>{emp.country}</TableCell>
-                  <TableCell className="font-mono text-sm tabular-nums">
-                    {formatCurrency(emp.salary, emp.currency)}
-                  </TableCell>
                   <TableCell>{emp.hireDate}</TableCell>
                   <TableCell>
-                    <div className="flex gap-1">
+                    <div className="flex gap-1" onClick={e => e.stopPropagation()}>
                       <Button
                         size="icon"
                         variant="ghost"
@@ -230,25 +216,13 @@ export default function EmployeeTable({ onAdd, onEdit, onDelete }: Props) {
 
       {data && data.totalPages > 1 && (
         <div className="flex items-center justify-between text-sm text-muted-foreground">
-          <span>
-            Page {page + 1} of {data.totalPages}
-          </span>
+          <span>Page {page + 1} of {data.totalPages}</span>
           <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={data.first}
-              onClick={() => setPage(p => p - 1)}
-            >
+            <Button variant="outline" size="sm" disabled={data.first} onClick={() => setPage(p => p - 1)}>
               <ChevronLeft size={14} />
               Previous
             </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={data.last}
-              onClick={() => setPage(p => p + 1)}
-            >
+            <Button variant="outline" size="sm" disabled={data.last} onClick={() => setPage(p => p + 1)}>
               Next
               <ChevronRight size={14} />
             </Button>

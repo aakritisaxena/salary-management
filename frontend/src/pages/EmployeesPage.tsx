@@ -6,12 +6,14 @@ import type { Employee, EmployeeRequest } from '@/types'
 import EmployeeTable from '@/components/employees/EmployeeTable'
 import EmployeeForm from '@/components/employees/EmployeeForm'
 import DeleteConfirmDialog from '@/components/employees/DeleteConfirmDialog'
+import EmployeeDetailDialog from '@/components/employees/EmployeeDetailDialog'
 
 export default function EmployeesPage() {
   const qc = useQueryClient()
   const [formOpen, setFormOpen] = useState(false)
   const [editing, setEditing] = useState<Employee | null>(null)
   const [deleting, setDeleting] = useState<Employee | null>(null)
+  const [viewing, setViewing] = useState<Employee | null>(null)
 
   const createMutation = useMutation({
     mutationFn: (req: EmployeeRequest) => employeeApi.create(req),
@@ -72,6 +74,7 @@ export default function EmployeesPage() {
         onAdd={() => { setEditing(null); setFormOpen(true) }}
         onEdit={(emp) => { setEditing(emp); setFormOpen(true) }}
         onDelete={(emp) => setDeleting(emp)}
+        onView={(emp) => setViewing(emp)}
       />
 
       <EmployeeForm
@@ -87,6 +90,11 @@ export default function EmployeesPage() {
         onClose={() => setDeleting(null)}
         onConfirm={() => deleting && deleteMutation.mutate(deleting.id)}
         isLoading={deleteMutation.isPending}
+      />
+
+      <EmployeeDetailDialog
+        employee={viewing}
+        onClose={() => setViewing(null)}
       />
     </>
   )
