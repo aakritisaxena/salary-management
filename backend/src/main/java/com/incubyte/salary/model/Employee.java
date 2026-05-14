@@ -9,7 +9,11 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 @Entity
-@Table(name = "employees")
+@Table(name = "employees", indexes = {
+        @Index(name = "idx_employees_country", columnList = "country"),
+        @Index(name = "idx_employees_department", columnList = "department"),
+        @Index(name = "idx_employees_job_title", columnList = "jobTitle")
+})
 public class Employee {
 
     @Id
