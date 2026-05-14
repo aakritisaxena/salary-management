@@ -4,6 +4,8 @@ import com.incubyte.salary.dto.DepartmentInsight;
 import com.incubyte.salary.dto.InsightsResponse;
 import com.incubyte.salary.dto.JobTitleInsight;
 import com.incubyte.salary.repository.EmployeeRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -11,6 +13,8 @@ import java.util.List;
 
 @Service
 public class SalaryInsightsService {
+
+    private static final Logger log = LoggerFactory.getLogger(SalaryInsightsService.class);
 
     private final EmployeeRepository employeeRepository;
 
@@ -41,6 +45,7 @@ public class SalaryInsightsService {
     }
 
     public List<JobTitleInsight> getJobTitleInsights(String country) {
+        log.info("Fetching salary insights for country: {}", country);
         return employeeRepository.findSalaryStatsByJobTitle(country);
     }
 }

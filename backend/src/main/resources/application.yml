@@ -27,3 +27,7 @@ server:
 app:
   seed:
     enabled: false
+
+logging:
+  level:
+    com.incubyte: INFO

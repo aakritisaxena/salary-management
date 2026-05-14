@@ -1,5 +1,7 @@
 package com.incubyte.salary.seeder;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
@@ -23,6 +25,8 @@ import java.util.UUID;
 
 @Component
 public class DataSeeder {
+
+    private static final Logger log = LoggerFactory.getLogger(DataSeeder.class);
 
     public static final int SEED_COUNT = 10_000;
     private static final int BATCH_SIZE = 500;
@@ -57,11 +61,16 @@ public class DataSeeder {
     public void seed() {
         Integer existing = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM employees", Integer.class);
         if (existing != null && existing >= SEED_COUNT) {
+            log.info("Seed skipped: {} employees already present", existing);
             return;
         }
         if (existing != null && existing > 0) {
+            log.info("Partial seed detected ({} rows): clearing before re-seed", existing);
             jdbcTemplate.execute("DELETE FROM employees");
         }
+
+        log.info("Starting seed: {} employees to insert", SEED_COUNT);
+        long startMs = System.currentTimeMillis();
 
         List<String> firstNames = loadLines("data/first_names.txt");
         List<String> lastNames = loadLines("data/last_names.txt");
@@ -104,6 +113,8 @@ public class DataSeeder {
                 });
             }
         });
+
+        log.info("Seeding complete: {} employees inserted in {}ms", SEED_COUNT, System.currentTimeMillis() - startMs);
     }
 
     private List<String> loadLines(String resourcePath) {

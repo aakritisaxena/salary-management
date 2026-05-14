@@ -5,6 +5,8 @@ import com.incubyte.salary.model.Employee;
 import com.incubyte.salary.model.EmployeeHistory;
 import com.incubyte.salary.repository.EmployeeHistoryRepository;
 import com.incubyte.salary.repository.EmployeeRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -16,6 +18,8 @@ import java.util.UUID;
 @Service
 public class EmployeeService {
 
+    private static final Logger log = LoggerFactory.getLogger(EmployeeService.class);
+
     private final EmployeeRepository employeeRepository;
     private final EmployeeHistoryRepository employeeHistoryRepository;
 
@@ -26,12 +30,16 @@ public class EmployeeService {
     }
 
     public Employee create(Employee employee) {
+        log.info("Creating employee: {}", employee.getFullName());
         return employeeRepository.save(employee);
     }
 
     public Employee findById(UUID id) {
         return employeeRepository.findById(id)
-                .orElseThrow(() -> new EmployeeNotFoundException(id));
+                .orElseThrow(() -> {
+                    log.warn("Employee not found: {}", id);
+                    return new EmployeeNotFoundException(id);
+                });
     }
 
     public Page<Employee> findAll(String country, String department, String name, Pageable pageable) {
@@ -53,6 +61,7 @@ public class EmployeeService {
 
     @Transactional
     public void delete(UUID id) {
+        log.info("Archiving employee: {}", id);
         Employee employee = findById(id);
         EmployeeHistory history = toHistory(employee);
         employeeHistoryRepository.save(history);
