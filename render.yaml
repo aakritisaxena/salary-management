@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: salary-management-backend
+    env: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    envVars:
+      - key: APP_SEED_ENABLED
+        value: "true"
+      - key: APP_CORS_ALLOWED_ORIGINS
+        value: "http://localhost:5173"
