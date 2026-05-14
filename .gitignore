@@ -33,7 +33,4 @@ Thumbs.db
 *.log
 /docs/
 .claude/
-/backend/.mvn/
-/backend/mvnw
-/backend/mvnw.cmd
 backend/src/test/resources/mockito-extensions/org.mockito.plugins.MockMaker
